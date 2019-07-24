@@ -1,7 +1,7 @@
 extern crate dialoguer;
 
 use dialoguer::{theme::ColorfulTheme, Checkboxes, Confirmation, Editor, Input};
-use std::env;
+use std::{env, fmt};
 
 #[derive(Debug)]
 struct Link {
@@ -15,6 +15,15 @@ struct Commands {
     build: String,
     test: String,
     install: String,
+}
+
+impl Commands {
+    fn is_empty(&self) -> bool {
+        return self.deps.is_empty()
+            && self.build.is_empty()
+            && self.test.is_empty()
+            && self.install.is_empty();
+    }
 }
 
 #[derive(Debug)]
@@ -33,19 +42,19 @@ impl Readme {
         let name_str = name.to_str().unwrap();
 
         Readme {
-            name: name_str.to_string(),
-            description: "".to_string(),
+            name: String::from(name_str),
+            description: String::from(""),
             image: Link {
-                text: "screenshot".to_string(),
-                url: "".to_string(),
+                text: String::from("screenshot"),
+                url: String::from(""),
             },
             commands: Commands {
-                deps: "".to_string(),
-                build: "".to_string(),
-                test: "".to_string(),
-                install: "".to_string(),
+                deps: String::from(""),
+                build: String::from(""),
+                test: String::from(""),
+                install: String::from(""),
             },
-            usage: "".to_string(),
+            usage: String::from(""),
         }
     }
 
@@ -144,7 +153,63 @@ impl Readme {
     }
 
     pub fn save(&self) {
+        let mut readme = String::new();
+        readme.push_str(&fmt::format(format_args!("# {}\n", self.name)));
+
+        if !self.description.is_empty() {
+            readme.push_str(&self.description);
+            readme.push_str("\n")
+        }
+
+        if !self.image.url.is_empty() {
+            readme.push_str(&fmt::format(format_args!(
+                "\n![{}]({})\n",
+                self.image.text, self.image.url
+            )));
+        }
+
+        if !self.commands.is_empty() {
+            readme.push_str("\n# Development\n\n");
+
+            if !self.commands.deps.is_empty() {
+                readme.push_str("## Dependencies\n");
+                readme.push_str(&fmt::format(format_args!(
+                    "```\n{}\n```\n\n",
+                    self.commands.deps
+                )));
+            }
+
+            if !self.commands.build.is_empty() {
+                readme.push_str("## Building\n");
+                readme.push_str(&fmt::format(format_args!(
+                    "```\n{}\n```\n\n",
+                    self.commands.build
+                )));
+            }
+
+            if !self.commands.test.is_empty() {
+                readme.push_str("## Testing\n");
+                readme.push_str(&fmt::format(format_args!(
+                    "```\n{}\n```\n\n",
+                    self.commands.test
+                )));
+            }
+
+            if !self.commands.install.is_empty() {
+                readme.push_str("## Installing\n");
+                readme.push_str(&fmt::format(format_args!(
+                    "```\n{}\n```\n\n",
+                    self.commands.install
+                )));
+            }
+        }
+
+        if !self.usage.is_empty() {
+            readme.push_str("# Usage\n");
+            readme.push_str(&fmt::format(format_args!("```\n{}\n```\n", self.usage)));
+        }
+
         // At the moment only print it, later save to README.md
-        println!("{:#?}", self);
+        println!("{}", readme);
     }
 }
