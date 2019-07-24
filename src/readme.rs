@@ -1,6 +1,8 @@
 extern crate dialoguer;
 
 use dialoguer::{theme::ColorfulTheme, Checkboxes, Confirmation, Editor, Input};
+use std::fs::File;
+use std::io::prelude::*;
 use std::{env, fmt};
 
 #[derive(Debug)]
@@ -19,10 +21,10 @@ struct Commands {
 
 impl Commands {
     fn is_empty(&self) -> bool {
-        return self.deps.is_empty()
+        self.deps.is_empty()
             && self.build.is_empty()
             && self.test.is_empty()
-            && self.install.is_empty();
+            && self.install.is_empty()
     }
 }
 
@@ -209,7 +211,7 @@ impl Readme {
             readme.push_str(&fmt::format(format_args!("```\n{}\n```\n", self.usage)));
         }
 
-        // At the moment only print it, later save to README.md
-        println!("{}", readme);
+        let mut file = File::create("README.md").unwrap();
+        let _ = file.write_all(readme.as_bytes());
     }
 }
