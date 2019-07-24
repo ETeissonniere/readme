@@ -1,3 +1,8 @@
+mod readme;
+use readme::Readme;
+
 fn main() {
-    println!("Hello, world!");
+    let mut readme = Readme::new();
+    readme.survey();
+    readme.save();
 }
